@@ -1,18 +1,19 @@
 #Implement Matrix Multiplication using Map-Reduce
 from collections import defaultdict
 
+# ---------------- MAPPER ----------------
 def mapper(A, B):
     mapped = []
     rows_A, cols_A = len(A), len(A[0])
     rows_B, cols_B = len(B), len(B[0])
 
-    # Emit A elements
+    # Emit elements of A
     for i in range(rows_A):
         for k in range(cols_A):
             for j in range(cols_B):
                 mapped.append(((i, j), ('A', k, A[i][k])))
 
-    # Emit B elements
+    # Emit elements of B
     for k in range(rows_B):
         for j in range(cols_B):
             for i in range(rows_A):
@@ -21,6 +22,7 @@ def mapper(A, B):
     return mapped
 
 
+# ---------------- SHUFFLE ----------------
 def shuffle_sort(mapped):
     grouped = defaultdict(list)
     for key, value in mapped:
@@ -28,6 +30,7 @@ def shuffle_sort(mapped):
     return grouped
 
 
+# ---------------- REDUCER ----------------
 def reducer(grouped):
     result = {}
 
@@ -53,7 +56,7 @@ def reducer(grouped):
     return result
 
 
-# -------- INPUT --------
+# ---------------- INPUT ----------------
 r1, c1 = map(int, input("Enter rows & cols of A: ").split())
 print("Enter Matrix A:")
 A = [list(map(int, input().split())) for _ in range(r1)]
@@ -68,13 +71,13 @@ print("Enter Matrix B:")
 B = [list(map(int, input().split())) for _ in range(r2)]
 
 
-# -------- MAPREDUCE --------
+# ---------------- MAPREDUCE ----------------
 mapped = mapper(A, B)
 grouped = shuffle_sort(mapped)
 result = reducer(grouped)
 
 
-# -------- OUTPUT --------
+# ---------------- OUTPUT ----------------
 print("\nResult Matrix:")
 for i in range(r1):
     for j in range(c2):
