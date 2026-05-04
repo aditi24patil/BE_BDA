@@ -30,15 +30,22 @@ INSERT INTO students VALUES (?, ?, ?, ?)
 conn.commit()
 print("Data Inserted\n")
 
+# 🔹 Index (IMPORTANT FIX)
+cursor.execute("CREATE INDEX idx_age ON students(age)")
+cursor.execute("CREATE INDEX idx_course ON students(course)")
+print("Indexes Created\n")
+
 print("All Students:")
 df = pd.read_sql_query("SELECT * FROM students", conn)
 print(df, "\n")
 
-print("Partition (course = BCA):")
+# 🔹 Simulated Partition
+print("Simulated Partition (course = BCA):")
 df_partition = pd.read_sql_query(
     "SELECT * FROM students WHERE course='BCA'", conn)
 print(df_partition, "\n")
 
+# 🔹 Built-in functions
 print("COUNT:", cursor.execute(
     "SELECT COUNT(*) FROM students").fetchone()[0])
 print("AVG AGE:", cursor.execute(
@@ -46,12 +53,13 @@ print("AVG AGE:", cursor.execute(
 print("MAX AGE:", cursor.execute(
     "SELECT MAX(age) FROM students").fetchone()[0], "\n")
 
+# 🔹 Operators
 print("Students with age > 21:")
 df_filter = pd.read_sql_query(
     "SELECT * FROM students WHERE age > 21", conn)
 print(df_filter, "\n")
 
-# FIXED VIEW CREATION
+# 🔹 View
 cursor.execute('''
 CREATE VIEW student_view AS
 SELECT name, age FROM students
