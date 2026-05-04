@@ -1,36 +1,46 @@
 #Develop a MapReduce program to calculate the frequency of a given word in a given file.
-import sys
 import re
 from collections import defaultdict
 
-def mapper(file_path):
-    """Map step: emit (word, 1) pairs"""
+def mapper(file_path, target_word):
+    """Map step: emit (word, 1) only for target word"""
     mapped = []
 
     with open(file_path, 'r', encoding='utf-8') as f:
         for line in f:
-            #remove punctuation and convert to lowercase
             words = re.findall(r'\b\w+\b', line.lower())
             for word in words:
-                mapped.append((word,1))
+                if word == target_word.lower():
+                    mapped.append((word, 1))
 
     return mapped
 
-def reducer(mapped_data, target_word):
-    """Reduce step: sum counts for target word"""
-    word_count = defaultdict(int)
-
-    #shuffle and sort (grouping)
+def shuffle_sort(mapped_data):
+    """Shuffle step: group values by key"""
+    grouped = defaultdict(list)
     for word, count in mapped_data:
-        word_count[word] += count
+        grouped[word].append(count)
+    return grouped
 
-    return word_count[target_word.lower()]
+def reducer(grouped_data):
+    """Reduce step: sum counts"""
+    reduced = {}
+    for word in grouped_data:
+        reduced[word] = sum(grouped_data[word])
+    return reduced
 
+# Input
 file_path = input("Enter file path: ")
 target_word = input("Enter word to count: ")
 
-mapped = mapper(file_path)
-frequency = reducer(mapped, target_word)
+try:
+    mapped = mapper(file_path, target_word)
+    grouped = shuffle_sort(mapped)
+    result = reducer(grouped)
 
+    frequency = result.get(target_word.lower(), 0)
 
-print(f"Frequency of '{target_word}': {frequency}")
+    print(f"Frequency of '{target_word}': {frequency}")
+
+except FileNotFoundError:
+    print("File not found. Please check the path.")
